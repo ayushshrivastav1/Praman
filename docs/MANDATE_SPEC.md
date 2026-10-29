@@ -6,7 +6,7 @@ This is the trust core. Everything else in the repo is plumbing around these thr
 
 ## 1. Mandate
 
-A mandate is a signed grant of bounded spend authority from a human issuer to an agent. It is the agentic equivalent of the consent-plus-limit pattern used in UPI Circle delegation and the Razorpay–NPCI agentic UPI pilot.
+A mandate is a signed grant of bounded spend authority from a human issuer to an agent. It is the agentic equivalent of the consent-plus-limit pattern used in UPI Circle delegation and the Zethetha–NPCI agentic UPI pilot.
 
 ```jsonc
 {
@@ -167,7 +167,7 @@ A `STEP_UP` persists a pending `Approval` row (`run-intent.ts`) rather than exec
 - **Reject or expire** (15 minutes, `APPROVAL_TTL_MS`) → the approval is marked `rejected`/`expired`, a `step_up_resolved` ledger event records it, nothing executes.
 - **Approve** → `evaluate()` runs again, fresh, against the mandate and ledger state *as they are now*, not as they were at step-up time. Revocation, expiry, budget and velocity are all re-checked. A `DENY` here refuses the approval outright (`REFUSED`), even though a human already said yes — approval cannot revive a mandate that died in the meantime.
 - **Amount binding** — the human approved a specific rupee figure. If the catalog moved between step-up and approval, the re-evaluated amount won't match what was approved, and the approval is refused with `AMOUNT_CHANGED_SINCE_APPROVAL` rather than silently executing a different amount than what was shown.
-- **Idempotent** — approving twice returns the same cached order the second time; exactly one Razorpay call ever happens per approval.
+- **Idempotent** — approving twice returns the same cached order the second time; exactly one Zethetha call ever happens per approval.
 
 The rejected alternative was executing the stored intent directly on approval, without re-evaluating. That's a bypass: park a `STEP_UP`, wait for the mandate to expire or be revoked, then approve, and money moves under dead authority.
 

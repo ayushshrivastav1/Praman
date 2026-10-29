@@ -25,7 +25,7 @@ if (env["LANGFUSE_SECRET_KEY"] && env["LANGFUSE_PUBLIC_KEY"]) {
 }
 
 const { runIntent } = await import("@praman/control-plane");
-const { LiveExecutor, SimulatedExecutor } = await import("@praman/razorpay-exec");
+const { SimulatedExecutor } = await import("@praman/zethetha-exec");
 const { formatINR } = await import("@praman/shared");
 const { GeminiProvider, TracedProvider } = await import("@praman/agent-core");
 const { propagateAttributes, startObservation } = await import("@langfuse/tracing");
@@ -34,7 +34,6 @@ const { recordAgentTranscript } = await import("./record-transcript.js");
 
 const baseGoal = process.argv[2] ?? "order lunch for two under ₹700";
 const merchantId = env["DEMO_MERCHANT_ID"] ?? "MERCH_001";
-const live = env["PRAMAN_LIVE"] === "1";
 const failWith = env["PRAMAN_FAIL"];
 if (failWith !== undefined && failWith !== "declined" && failWith !== "timeout") {
   throw new Error(`PRAMAN_FAIL must be "declined" or "timeout", got: ${failWith}`);
@@ -51,9 +50,7 @@ const signed = JSON.parse(readFileSync(mandatePath, "utf8")) as SignedMandate;
 
 console.log(`\n▸ goal: ${baseGoal}`);
 console.log(`▸ merchant: ${merchantId}`);
-console.log(
-  `▸ executor: ${live ? "LIVE (real Razorpay test-mode order)" : `simulated${failWith ? ` (forced: ${failWith})` : ""}`}\n`,
-);
+console.log(`▸ executor: simulated Zethetha${failWith ? ` (forced: ${failWith})` : ""}\n`);
 
 const provider = new TracedProvider(new GeminiProvider(geminiKey, "gemini-3.1-flash-lite"));
 
@@ -105,9 +102,7 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     agent_rationale: agent.cart.rationale,
   };
 
-  const executor = live
-    ? new LiveExecutor(env["RAZORPAY_KEY_ID"] ?? "", env["RAZORPAY_KEY_SECRET"] ?? "")
-    : new SimulatedExecutor(failWith);
+  const executor = new SimulatedExecutor(failWith);
 
   // Output is the agent-visible decision plus the internal reason code only
   // — RunResult never carries the internal Decision.detail string (that
@@ -133,7 +128,7 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     console.log(`▸ IN FLIGHT — ${result.detail}`);
     console.log(`\n  The system does not know whether this order was created. It will not`);
     console.log(`  guess by retrying — that is how a double charge happens. A reconciler`);
-    console.log(`  resolves this once Razorpay's own propagation lag has passed (D-22).\n`);
+    console.log(`  resolves this once the payment adapter's propagation lag has passed (D-22).\n`);
     process.exit(0);
   }
 

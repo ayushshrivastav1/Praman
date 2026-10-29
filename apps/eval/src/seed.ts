@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { append } from "@praman/ledger";
 import { generateKeypair, signMandate, type MandateDocument, type SignedMandate } from "@praman/mandate";
-import { idempotencyKey } from "@praman/razorpay-exec";
+import { idempotencyKey } from "@praman/zethetha-exec";
 import type { PurchaseIntent } from "@praman/policy";
 import { prisma } from "./db.js";
 import type { Layer1Case, Layer2Case, SeedEvent } from "./types.js";

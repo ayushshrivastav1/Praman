@@ -3,7 +3,7 @@ import { prisma } from "@praman/db";
 import { append } from "@praman/ledger";
 import type { PurchaseIntent } from "@praman/policy";
 import { generateKeypair, signMandate, type MandateDocument } from "@praman/mandate";
-import { SimulatedExecutor, type ExecOutcome, type Executor } from "@praman/razorpay-exec";
+import { SimulatedExecutor, type ExecOutcome, type Executor } from "@praman/zethetha-exec";
 import type { Paise } from "@praman/shared";
 import { runIntent } from "../src/run-intent.js";
 
@@ -75,7 +75,7 @@ async function seedPriorHistory(mandateId: string) {
   );
 }
 
-describe("runIntent never issues a second razorpay call for a duplicate intent", () => {
+describe("runIntent never issues a second zethetha call for a duplicate intent", () => {
   it("a second identical intent after a successful run does not call the executor again", async () => {
     const mandateId = "mnd_dup_test_1";
     await seedPriorHistory(mandateId);

@@ -19,7 +19,7 @@ praman/
 │   ├── shared/        types, Money, Result, canonical.ts, untrusted.ts, reason-codes.ts
 │   ├── policy/        evaluate.ts  ← hand-written
 │   ├── ledger/        append.ts, chain.ts, derive.ts, verify.ts
-│   ├── razorpay-exec/ execute.ts, idempotency.ts, reconcile.ts
+│   ├── zethetha-exec/ execute.ts, idempotency.ts, reconcile.ts
 │   └── dispute/       bundle.ts
 ├── apps/
 │   ├── control-plane/ Express API
@@ -229,7 +229,7 @@ test("monotone: once budget-denied, identical intent never allows")
 
 ---
 
-## 6. Idempotency & concurrency (`packages/razorpay-exec`)
+## 6. Idempotency & concurrency (`packages/zethetha-exec`)
 
 ```ts
 export const idempotencyKey = (mandateId: string, intent: PurchaseIntent): string =>
@@ -260,7 +260,7 @@ export async function execute(
 ): Promise<Result<ExecOutcome, PramanError>>;
 ```
 
-Order: check `idempotency_record` → create Razorpay order (test mode) → capture → write `idempotency_record` → append `api_call` and `outcome`. On timeout, `reconcile.ts` queries Razorpay by receipt (= our key) **before** any retry is permitted.
+Order: check `idempotency_record` → create Zethetha order (test mode) → capture → write `idempotency_record` → append `api_call` and `outcome`. On timeout, `reconcile.ts` queries Zethetha by receipt (= our key) **before** any retry is permitted.
 
 ---
 

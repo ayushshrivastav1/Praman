@@ -10,8 +10,8 @@ The rule: *if you cannot explain the phase you just finished without looking at 
 
 Repo, spec, keys, rails.
 
-**Exit:** public repo with docs committed; Razorpay test keys work; one manual test-mode payment completed via dashboard.
-**Gate:** you can explain what a Razorpay order is, what a payment is, and why capture is a separate step.
+**Exit:** public repo with docs committed; Zethetha test keys work; one manual test-mode payment completed via dashboard.
+**Gate:** you can explain what a Zethetha order is, what a payment is, and why capture is a separate step.
 
 ## Phase 1 — The decision core · Day 1 (Thu 28 Aug)
 
@@ -29,7 +29,7 @@ Postgres, Prisma, hash chain, immutability rules, `deriveState`, `verify-ledger`
 
 ## Phase 3 — Control plane + execution · Day 3 (Sat 30 Aug)
 
-Express API, Ed25519 mandate issuance and verification, `razorpay-exec`, idempotency, advisory lock, one transaction end to end.
+Express API, Ed25519 mandate issuance and verification, `zethetha-exec`, idempotency, advisory lock, one transaction end to end.
 
 **Exit:** signed mandate → intent → ALLOW → real test-mode payment → complete ledger trace. Screen-record it as insurance.
 **Gate:** explain what happens if two identical intents arrive in the same millisecond, and why you chose an advisory lock over SERIALIZABLE.

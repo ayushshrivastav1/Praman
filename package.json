@@ -47,7 +47,7 @@
     "@praman/dispute": "workspace:*",
     "@praman/ledger": "workspace:*",
     "@praman/mandate": "workspace:*",
-    "@praman/razorpay-exec": "workspace:*",
+    "@praman/zethetha-exec": "workspace:*",
     "@praman/shared": "workspace:*",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",

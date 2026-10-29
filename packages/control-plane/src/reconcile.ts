@@ -1,13 +1,13 @@
 import { prisma } from "@praman/db";
 import { append } from "@praman/ledger";
 import { paiseFromDb, paiseToJSON } from "@praman/shared";
-import type { Executor } from "@praman/razorpay-exec";
+import type { Executor } from "@praman/zethetha-exec";
 import { RECONCILE_MIN_AGE_MS } from "./run-intent.js";
 
 /**
  * Resolves pending records left by a crash or an ambiguous failure.
  *
- * Refuses to touch a record younger than RECONCILE_MIN_AGE_MS: Razorpay's order
+ * Refuses to touch a record younger than RECONCILE_MIN_AGE_MS: Zethetha's order
  * lookup lags creation by seconds, so an early reconcile would see nothing,
  * conclude no order exists, and create a duplicate — the exact double-charge
  * this whole structure exists to prevent. Waiting is the correct behaviour.

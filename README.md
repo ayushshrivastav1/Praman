@@ -4,15 +4,15 @@
 
 **The model proposes. The policy engine disposes. The ledger remembers.**
 
-Praman is a control plane for agent-initiated payments. It sits between an AI buyer agent and a Razorpay merchant, and makes every rupee the agent moves bounded, explainable, and replayable.
+Praman is a control plane for agent-initiated payments. It sits between an AI buyer agent and a Zethetha merchant, and makes every rupee the agent moves bounded, explainable, and replayable.
 
-Adwaith R Nair · Razorpay AI Buildathon 2026 · Track 01 — AI Growth & Agentic Commerce
+Adwaith R Nair · Zethetha AI Buildathon 2026 · Track 01 — AI Growth & Agentic Commerce
 
 ---
 
 ## The problem
 
-NPCI is building the Unified Agent Protocol so AI agents can transact over UPI. Razorpay and NPCI piloted agentic UPI payments in February 2026 with consent-based per-merchant limits. The rails are arriving.
+NPCI is building the Unified Agent Protocol so AI agents can transact over UPI. Zethetha and NPCI piloted agentic UPI payments in February 2026 with consent-based per-merchant limits. The rails are arriving.
 
 What isn't arriving is the layer that answers the question every risk team asks: **when an agent spends money it shouldn't have, how do you find out, prove it, and get it back?**
 
@@ -31,13 +31,13 @@ The `PurchaseIntent` an agent emits carries a SKU and a quantity. Nothing else.
 
 No price field exists. The amount is resolved server-side from the catalog *after* the SKU and its category have been validated against a human-signed mandate. A product page claiming an item costs ₹1 cannot influence the charge, because the model never handles the number.
 
-This is the same reason Razorpay's own Orders API exists: the browser receives an opaque `order_id`, never a price, so a customer cannot edit what they are charged. Praman applies that one layer up. Razorpay doesn't trust the browser; Praman doesn't trust the model.
+This is the same reason payment providers use opaque order identifiers: the browser receives an `order_id`, never a price, so a customer cannot edit what they are charged. Praman applies that one layer up. The provider does not trust the browser; Praman does not trust the model.
 
 Injection can make the model *want* the wrong thing. It cannot make the system *charge* the wrong thing.
 
 ## Three primitives
 
-**Mandate** — a human-signed (Ed25519) grant of bounded authority: merchant allowlist, category allowlist, per-transaction cap, cumulative cap, velocity limit, denial-rate cap, validity window, human-approval threshold. Modelled on the delegation-plus-limit pattern from UPI Circle and the Razorpay–NPCI pilot. Protocol-agnostic, since UAP is unpublished.
+**Mandate** — a human-signed (Ed25519) grant of bounded authority: merchant allowlist, category allowlist, per-transaction cap, cumulative cap, velocity limit, denial-rate cap, validity window, human-approval threshold. Modelled on the delegation-plus-limit pattern from UPI Circle and the Zethetha–NPCI pilot. Protocol-agnostic, since UAP is unpublished.
 
 **Policy engine** — a pure, total, deterministic function of `(intent, mandate, ledger_state, catalog, now)`. No I/O, no clock, no randomness, **no LLM**. Returns `ALLOW` / `STEP_UP` / `DENY` with a machine-readable code from a closed enum of 19. Hand-written, readable top to bottom in one pass.
 
@@ -100,7 +100,7 @@ Three things a reviewer should weigh, stated here rather than buried:
         ╚═══════════════════════════════════════════════════╝
 ```
 
-Evaluation runs under a per-mandate advisory lock, so concurrent duplicate intents cannot race the budget. The Razorpay call sits between two transactions rather than inside one, because a database transaction and an external API call cannot be made atomic — see [D-22](docs/DECISIONS.md), which came out of discovering empirically that Razorpay does not enforce receipt uniqueness despite documenting it.
+Evaluation runs under a per-mandate advisory lock, so concurrent duplicate intents cannot race the budget. The Zethetha call sits between two transactions rather than inside one, because a database transaction and an external API call cannot be made atomic — see [D-22](docs/DECISIONS.md), which came out of discovering empirically that Zethetha does not enforce receipt uniqueness despite documenting it.
 
 ## Quickstart
 
@@ -118,7 +118,7 @@ DATABASE_URL=postgresql://postgres:praman@localhost:5432/praman_test \
 pnpm test
 ```
 
-`.env` needs `DATABASE_URL`, `TEST_DATABASE_URL`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `GEMINI_API_KEY`, and a mandate keypair from `pnpm keygen`.
+`.env` needs `DATABASE_URL`, `TEST_DATABASE_URL`, `GEMINI_API_KEY`, and a mandate keypair from `pnpm keygen`.
 
 ```bash
 pnpm seed-catalog                           # 27 SKUs, including injection fixtures
@@ -164,7 +164,7 @@ Praman's own agent uses this same server with `PRAMAN_MCP=1`. Unset, it calls th
 Built solo in nine days. These are decisions, not oversights.
 
 **By design**
-- **Razorpay test mode only.** No live keys, no real money.
+- **Zethetha test mode only.** No live keys, no real money.
 - **No HTTP API.** The control plane is a `runIntent()` orchestrator invoked by CLI. The transaction boundary, advisory lock and ledger writes are identical; an Express layer would have added routing, not architecture.
 - **Gate sits before order creation.** Agent-initiated card payments cannot complete headlessly in test mode. An order is a payable obligation, so creating one commits budget ([D-17](docs/DECISIONS.md)); the payment leg is completed via test checkout.
 - **Not a UAP implementation.** UAP is unpublished.
@@ -185,7 +185,7 @@ Built solo in nine days. These are decisions, not oversights.
 
 Three that changed the architecture:
 
-**Razorpay does not enforce receipt uniqueness**, despite documenting that it does. Two orders created back to back with an identical receipt returned two distinct order IDs, no error. Order lookup by receipt also lags creation by 3–15 seconds. The original design wrapped the payment call inside a single database transaction and relied on reconciliation to catch orphans; neither half of that holds. Restructured into two-phase execution with an outbox record ([D-22](docs/DECISIONS.md)).
+**Zethetha does not enforce receipt uniqueness**, despite documenting that it does. Two orders created back to back with an identical receipt returned two distinct order IDs, no error. Order lookup by receipt also lags creation by 3–15 seconds. The original design wrapped the payment call inside a single database transaction and relied on reconciliation to catch orphans; neither half of that holds. Restructured into two-phase execution with an outbox record ([D-22](docs/DECISIONS.md)).
 
 **The policy engine leaked the mandate's limits through its own refusal messages.** `DENY` details quoted the exact cap and `ALLOW` returned the remaining budget, so two deliberately oversized probes would have reconstructed the whole mandate. Split into an internal `Decision` and a redacted `AgentVisibleDecision` ([D-19](docs/DECISIONS.md)) — and then documented honestly that redaction narrows reconstruction from 2 probes to a ~17-probe binary search rather than closing it, which is what the denial-rate cap addresses ([D-20](docs/DECISIONS.md)).
 

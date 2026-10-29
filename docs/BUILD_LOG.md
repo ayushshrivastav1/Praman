@@ -29,11 +29,11 @@ implied.
 - pnpm's `init` defaults to ISC while my LICENSE file is MIT. Two files
   disagreeing about licensing is a small thing that erodes trust in the rest.
 
-## Day 1 — 28 Aug 2026 · Razorpay rails
+## Day 1 — 28 Aug 2026 · Zethetha rails
 
-- Razorpay's published Indian test cards have drifted across doc pages. The
+- Zethetha's published Indian test cards have drifted across doc pages. The
   widely-cited `4111 1111 1111 1111` no longer works; the current Visa success
-  card is `4100 2800 0000 1007`. Confirmed against razorpay/markdown-docs
+  card is `4100 2800 0000 1007`. Confirmed against zethetha/markdown-docs
   rather than a blog. Lesson: pin test fixtures to the provider's source repo.
 - Set payment capture to Manual temporarily to observe the `authorized` →
   `captured` transition that auto-capture hides. Worth doing once — it makes
@@ -42,7 +42,7 @@ implied.
 - Learned the order exists so the amount is fixed server-side: the browser
   only ever receives an opaque `order_id` and cannot express a price. Praman's
   `PurchaseIntent` carries SKU and quantity for the same reason, one layer up.
-  Razorpay doesn't trust the browser; we don't trust the model.
+  Zethetha doesn't trust the browser; we don't trust the model.
 - Chose "refund automatically" for uncaptured authorizations over manual
   dashboard capture. Orphaned holds on a customer's card are a liability
   nobody will monitor. Fail-closed: when a money flow ends ambiguous, default
@@ -287,7 +287,7 @@ implied.
   doesn't match the exemption. Used `@ts-expect-error` instead, which reads
   better: it documents a deliberately induced type error rather than
   laundering one through a cast.
-- Third instance this week of documentation outrunning reality — Razorpay's
+- Third instance this week of documentation outrunning reality — Zethetha's
   test cards, Prisma's dist-tags, and now my own decision record. The failure
   mode of fast-moving systems isn't wrong code, it's confident text describing
   code that has changed or hasn't been written.
@@ -403,7 +403,7 @@ implied.
 
 ## Day 8b — 4 Sep 2026 · mandate, catalog, idempotency, execution
 
-- Boundary hydration: `paiseFromDb`/`paiseFromRazorpay` closed three of D-18's
+- Boundary hydration: `paiseFromDb`/`paiseFromZethetha` closed three of D-18's
   four open rows in one pass; `loadCatalogSnapshot` landing right after
   turned out to close the fourth for free — the "catalog price lookup"
   boundary and the general "Postgres rows" boundary are the same call site
@@ -426,14 +426,14 @@ implied.
   exact replay of the same intent object," not "the agent's second attempt at
   the same goal" — the latter is Block C's job (reuse the same intent on an
   internal retry), not this layer's.
-- The Razorpay executor: `Number(amountPaise)` on the outbound call had no
-  guard symmetric to `paiseFromRazorpay`'s inbound `Number.isSafeInteger`
+- The Zethetha executor: `Number(amountPaise)` on the outbound call had no
+  guard symmetric to `paiseFromZethetha`'s inbound `Number.isSafeInteger`
   check. Currently unreachable at this project's mandate caps, fixed anyway —
   a boundary is a boundary regardless of whether today's data can trip it.
 
-## Day 8c — 4 Sep 2026 · the Razorpay guarantees that weren't
+## Day 8c — 4 Sep 2026 · the Zethetha guarantees that weren't
 
-- Building the orchestrator, tested two of Razorpay's documented claims
+- Building the orchestrator, tested two of Zethetha's documented claims
   empirically instead of trusting them. Created two orders back to back with
   an identical `receipt` — despite the docs stating receipts "have to be
   unique," got two distinct order IDs, no error. Then measured
@@ -703,7 +703,7 @@ implied.
   `praman_test` database created alongside it, `prisma migrate deploy`
   against both, then `pnpm typecheck`, `pnpm test`, `pnpm verify-ledger`,
   `pnpm eval --layer1 --dev`. No repo secrets needed — nothing in that
-  sequence reads a Razorpay, Anthropic, Gemini, or mandate-signing key
+  sequence reads a Zethetha, Anthropic, Gemini, or mandate-signing key
   (Layer 1 signs fresh throwaway keypairs per case, every executor is
   simulated); only Layer 2 needs `GEMINI_API_KEY`, and it stays manual.
 - Couldn't typecheck YAML, so verified it for real instead of trusting it:
@@ -762,7 +762,7 @@ implied.
 
 - Claude Chat's `pnpm demo` run surfaced a real deadlock: `STEP_UP_FIRST_MERCHANT`
   fires when a merchant isn't in `merchants_transacted`, which `deriveState`
-  builds only from `status: "captured"` outcomes. `LiveExecutor.createOrder`
+  builds only from `status: "captured"` outcomes. An external executor's `createOrder`
   returns `status: "created"` immediately — capture only happens later via
   reconciliation — so in live mode spend never accumulates and a merchant
   never enters the set. First purchase steps up, nothing resolves it, no
@@ -782,7 +782,7 @@ implied.
   `canonical()` before saving, not the raw object, so re-deriving the
   idempotency key at resolution time (1c) produces exactly the same key
   the step-up itself computed. Verified live with a new smoke script
-  (`smoke-step-up-approval.ts`, `SimulatedExecutor`, no Razorpay keys
+  (`smoke-step-up-approval.ts`, `SimulatedExecutor`, no Zethetha keys
   needed since STEP_UP never reaches the executor call) — confirmed the
   row lands with the right mandate, amount, status, and that the stored
   intent round-trips correctly.
@@ -831,7 +831,7 @@ implied.
 - `scripts/approve.ts` and `scripts/pending.ts` (1e), same dotenv-before-
   dynamic-import pattern as `verify-ledger.ts` (a static import would reach
   `@praman/db` before the config() call). Needed adding
-  `@praman/control-plane`, `@praman/razorpay-exec`, and `@praman/shared` to
+  `@praman/control-plane`, `@praman/zethetha-exec`, and `@praman/shared` to
   the root `package.json` — `scripts/` had never imported them before, so
   they weren't resolvable there yet.
 - Ran the actual video beat end-to-end through the real CLI, not a smoke
@@ -1653,7 +1653,7 @@ caught only now under Claude Chat's explicit instruction to test a
 genuinely fresh environment rather than one already carrying state.
 Fixed by adding the same `dotenv.config()` pattern the other scripts
 already use. `demo.ts` needed more care than the others: its imports of
-`@praman/control-plane` and `@praman/razorpay-exec` were static, and a
+`@praman/control-plane` and `@praman/zethetha-exec` were static, and a
 static import is hoisted and evaluated before any of a module's own
 top-level code — including a `config()` call placed after it — so
 `@praman/db` was throwing before dotenv ever got a chance to run.
@@ -1747,7 +1747,7 @@ if any reason code lacks a fixture and isn't on that list. Separately,
 `lint:casts` (`packages/shared/package.json`) existed since early in the
 original build but was never actually run in CI — fixed. Added a new
 import-boundary check (`scripts/check-import-boundary.ts`) that fails if
-`packages/policy`, `packages/ledger`, or `packages/razorpay-exec` import
+`packages/policy`, `packages/ledger`, or `packages/zethetha-exec` import
 anything model- or observability-adjacent, `@langfuse/*` included —
 ahead of Phase 10, so Langfuse can never be wired into the money path
 even by accident. Proved it catches a real violation on a throwaway,
@@ -1776,6 +1776,6 @@ in enough ways — file layout, the held-out mechanism, which families got
 built, which metrics exist — that it earned its own "As built" section
 rather than scattered inline notes.
 
-Tagged `v1.0-submission` at the exact commit Razorpay's panel evaluated
+Tagged `v1.0-submission` at the exact commit Zethetha's panel evaluated
 (`4b38243`), before `main` moved any further — a fixed reference point
 independent of everything after it.

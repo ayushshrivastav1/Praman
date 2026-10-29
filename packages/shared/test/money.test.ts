@@ -7,7 +7,7 @@ import {
   formatINR,
   paiseFromJSON,
   paiseFromDb,
-  paiseFromRazorpay,
+  paiseFromZethetha,
 } from "../src/money.js";
 
 describe("Paise", () => {
@@ -68,26 +68,26 @@ describe("paiseFromDb", () => {
   });
 });
 
-describe("paiseFromRazorpay", () => {
-  it("hydrates a Razorpay JSON number", () => {
-    expect(paiseFromRazorpay(48000)).toBe(48000n);
+describe("paiseFromZethetha", () => {
+  it("hydrates a Zethetha JSON number", () => {
+    expect(paiseFromZethetha(48000)).toBe(48000n);
   });
 
   it("rejects a fractional amount", () => {
-    expect(() => paiseFromRazorpay(48000.5)).toThrow(RangeError);
+    expect(() => paiseFromZethetha(48000.5)).toThrow(RangeError);
   });
 
   it("rejects a value past Number.MAX_SAFE_INTEGER", () => {
-    expect(() => paiseFromRazorpay(2 ** 53)).toThrow(RangeError);
+    expect(() => paiseFromZethetha(2 ** 53)).toThrow(RangeError);
   });
 
   it("rejects a negative amount", () => {
-    expect(() => paiseFromRazorpay(-100)).toThrow(RangeError);
+    expect(() => paiseFromZethetha(-100)).toThrow(RangeError);
   });
 
   it("rejects a non-number", () => {
-    expect(() => paiseFromRazorpay("48000")).toThrow(TypeError);
-    expect(() => paiseFromRazorpay(null)).toThrow(TypeError);
-    expect(() => paiseFromRazorpay(undefined)).toThrow(TypeError);
+    expect(() => paiseFromZethetha("48000")).toThrow(TypeError);
+    expect(() => paiseFromZethetha(null)).toThrow(TypeError);
+    expect(() => paiseFromZethetha(undefined)).toThrow(TypeError);
   });
 });
