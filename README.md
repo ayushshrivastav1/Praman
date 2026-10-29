@@ -6,7 +6,7 @@
 
 Praman is a control plane for agent-initiated payments. It sits between an AI buyer agent and a Zethetha merchant, and makes every rupee the agent moves bounded, explainable, and replayable.
 
-Adwaith R Nair · Zethetha AI Buildathon 2026 · Track 01 — AI Growth & Agentic Commerce
+Ayush Shrivastav · Zethetha AI Buildathon 2026 · Track 01 — AI Growth & Agentic Commerce
 
 ---
 
