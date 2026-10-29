@@ -1,12 +1,10 @@
 # Praman
 
-[![CI](https://github.com/Adwaith-R-Nair/Praman/actions/workflows/ci.yml/badge.svg)](https://github.com/Adwaith-R-Nair/Praman/actions/workflows/ci.yml)
-
 **The model proposes. The policy engine disposes. The ledger remembers.**
 
 Praman is a control plane for agent-initiated payments. It sits between an AI buyer agent and a Zethetha merchant, and makes every rupee the agent moves bounded, explainable, and replayable.
 
-Ayush Shrivastav · Zethetha AI Buildathon 2026 · Track 01 — AI Growth & Agentic Commerce
+Ayush Shrivastav · Zethetha AI Buildathon 2026 · Track 04 — AI-powered financial advisory
 
 ---
 
