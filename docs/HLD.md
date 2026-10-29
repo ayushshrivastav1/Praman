@@ -40,7 +40,7 @@ TRUSTED                          │  UNTRUSTED
 • Ledger + hash chain            │  • Merchant API responses
 • Catalog price data (server-    │  • Everything the LLM outputs
   side, from DB not from prompt) │  • The LLM's own reasoning text
-• Razorpay API responses         │  • Any amount, SKU, or scope the
+• payment-provider responses     │  • Any amount, SKU, or scope the
   (authenticated)                │    model "suggests"
 ```
 
@@ -74,7 +74,7 @@ That second point is the core insight of the whole project. **Constrain the inte
         ║  └──────────────┘   └──────┬───────┘   └───────┬───────┘  ║
         ║         ▲                  │ ALLOW              │ new      ║
         ║         │           STEP_UP│DENY        ┌───────▼───────┐  ║
-        ║  ┌──────┴───────┐          │            │ razorpay-exec │  ║
+        ║  ┌──────┴───────┐          │            │ zethetha-exec │  ║
         ║  │ deriveState  │◄─────────┼────────────│ (C4) test mode│  ║
         ║  │ (replay)     │          │            └───────┬───────┘  ║
         ║  └──────┬───────┘          │                    │          ║
@@ -94,7 +94,7 @@ That second point is the core insight of the whole project. **Constrain the inte
 | C1 | `packages/policy` | The authorisation decision | Touch I/O, the clock, randomness, or an LLM |
 | C2 | `packages/ledger` | Append, chain, verify, derive state | Ever expose update or delete |
 | C3 | `apps/control-plane` | HTTP, orchestration, transactions | Contain any business rule — it delegates to C1 |
-| C4 | `packages/razorpay-exec` | Test-mode execution, idempotency, retry | Decide *whether* to execute |
+| C4 | `packages/zethetha-exec` | Test-mode execution, idempotency, retry | Decide *whether* to execute |
 | C5 | `apps/eval` | Corpus, runner, metrics | Generate attacks dynamically |
 | C6 | `apps/merchant-mcp` | Agent-readable catalog over MCP | Be trusted |
 | C7 | `apps/buyer-agent` | Planning, proposing intents | Authorise anything |
@@ -108,11 +108,11 @@ That second point is the core insight of the whole project. **Constrain the inte
 ### 5.1 Happy path
 
 ```
-agent          control-plane        policy      ledger       razorpay
+agent          control-plane        policy      ledger       zethetha
   │  intent ────────►│                 │           │            │
   │                  │ [T1 — advisory lock]         │            │
   │                  │ verify mandate  │           │            │
-  │                  │ idempotency check (own row, not Razorpay) │
+  │                  │ idempotency check (own row, not Zethetha) │
   │                  │ deriveState ────────────────►│            │
   │                  │◄──── spent, velocity ────────│            │
   │                  │ evaluate() ─────►│           │            │
@@ -132,12 +132,12 @@ agent          control-plane        policy      ledger       razorpay
 
 **Two phases, not one transaction — see D-22.** A database transaction and an
 external API call cannot be made atomic; there is no protocol between
-Postgres and Razorpay that makes both commit or both fail together. What's
+Postgres and Zethetha that makes both commit or both fail together. What's
 achievable instead: no external call is ever made without a durable,
 committed record (T1's pending row) naming what was about to happen. If
 execution fails ambiguously (timeout, crash before T2), the call returns
 `IN_FLIGHT` rather than a decision, and a reconciler resolves the pending row
-once Razorpay's own propagation lag has passed. An executed payment with no
+once the payment adapter's propagation lag has passed. An executed payment with no
 trace of the attempt at all is structurally impossible; an executed payment
 whose *outcome* is briefly unrecorded, with a durable pointer to what to
 check, is the accepted, named trade-off.
@@ -152,7 +152,7 @@ Nothing executes. The agent receives `{ decision: "DENY", reason_code, remaining
 
 ### 5.4 Execution failure
 
-Razorpay returns a decline or times out. Typed error → agent diagnoses → **at most one** retry on an alternate method (new intent, new key) → if the retry would breach the mandate, escalate to human rather than loop. Both attempts are in the ledger.
+The payment adapter returns a decline or times out. Typed error → agent diagnoses → **at most one** retry on an alternate method (new intent, new key) → if the retry would breach the mandate, escalate to human rather than loop. Both attempts are in the ledger.
 
 ## 6. Failure modes and mitigations
 

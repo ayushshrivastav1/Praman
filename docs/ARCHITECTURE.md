@@ -6,13 +6,13 @@
 
 ## What this is
 
-A control plane that sits between an AI buyer agent and a Razorpay merchant, making every rupee the agent moves **bounded, explainable, and replayable**.
+A control plane that sits between an AI buyer agent and a Zethetha merchant, making every rupee the agent moves **bounded, explainable, and replayable**.
 
 > The model proposes. The policy engine disposes. The ledger remembers.
 
 ## Why it exists
 
-NPCI is building the Unified Agent Protocol so AI agents can transact over UPI. Razorpay and NPCI piloted agentic UPI payments on Claude in February 2026, using consent-based per-merchant spending limits. The rails are arriving.
+NPCI is building the Unified Agent Protocol so AI agents can transact over UPI. Zethetha and NPCI piloted agentic UPI payments on Claude in February 2026, using consent-based per-merchant spending limits. The rails are arriving.
 
 What isn't arriving is the layer that answers the question every risk team asks: **when an agent spends money it shouldn't have, how do you find out, prove it, and get it back?**
 
@@ -35,7 +35,7 @@ Injection can make the model *want* the wrong thing. It cannot make the system *
 
 ## The three primitives
 
-**1. Mandate** — a human-signed (Ed25519) grant of bounded authority: merchant allowlist, category allowlist, per-transaction cap, cumulative cap, velocity limit, validity window, human-approval threshold. Modelled on the delegation-plus-limit pattern from UPI Circle and the Razorpay–NPCI pilot. Protocol-agnostic by design, since UAP is unpublished.
+**1. Mandate** — a human-signed (Ed25519) grant of bounded authority: merchant allowlist, category allowlist, per-transaction cap, cumulative cap, velocity limit, validity window, human-approval threshold. Modelled on the delegation-plus-limit pattern from UPI Circle and the Zethetha–NPCI pilot. Protocol-agnostic by design, since UAP is unpublished.
 
 **2. Policy engine** — a pure, total, deterministic function of one input object (`intent`, `mandate`, `ledger_state`, `catalog`, `now`, `idempotency_key`). No I/O, no clock, no randomness, **no LLM**. Returns `ALLOW` / `STEP_UP` / `DENY` with a machine-readable reason code from a closed enum of 19. Hand-written, readable top to bottom in one pass.
 
@@ -51,7 +51,7 @@ Injection can make the model *want* the wrong thing. It cannot make the system *
         ╔═════════════════ TRUST BOUNDARY ═════════════════╗
         ║  verify sig → derive state → evaluate() → gate   ║
         ║       │                                          ║
-        ║   ALLOW → idempotency guard → Razorpay test mode  ║
+        ║   ALLOW → idempotency guard → Zethetha test mode  ║
         ║   STEP_UP → human approval                       ║
         ║   DENY → typed reason code, nothing executes     ║
         ║       │                                          ║
@@ -59,11 +59,11 @@ Injection can make the model *want* the wrong thing. It cannot make the system *
         ╚══════════════════════════════════════════════════╝
 ```
 
-Evaluation and execution run in **two phases**, not one transaction: a database transaction and an external Razorpay call cannot be made atomic (there is no protocol between them). What's guaranteed instead is that no call to Razorpay is ever made without a durable, committed record naming what was about to happen — so a crash or ambiguous failure between the call and recording its outcome leaves a resolvable trail, not a silent gap. A per-mandate advisory lock, held in both phases, still stops concurrent duplicate intents from racing the budget. See D-22.
+Evaluation and execution run in **two phases**, not one transaction: a database transaction and an external Zethetha call cannot be made atomic (there is no protocol between them). What's guaranteed instead is that no call to Zethetha is ever made without a durable, committed record naming what was about to happen — so a crash or ambiguous failure between the call and recording its outcome leaves a resolvable trail, not a silent gap. A per-mandate advisory lock, held in both phases, still stops concurrent duplicate intents from racing the budget. See D-22.
 
 ## Stack
 
-TypeScript (strict) · Postgres + Prisma · Ed25519 via `node:crypto` · a provider-neutral model interface (Gemini and Anthropic implementations) with tool use · MCP for the merchant catalog · Razorpay Node SDK, test mode only · Vitest + a custom eval runner in CI.
+TypeScript (strict) · Postgres + Prisma · Ed25519 via `node:crypto` · a provider-neutral model interface (Gemini and Anthropic implementations) with tool use · MCP for the merchant catalog · Zethetha-compatible simulated executor · Vitest + a custom eval runner in CI.
 
 No HTTP framework — the control plane is a `runIntent()` orchestrator invoked by CLI, not a server (Express was the original plan; see the roadmap for the actual HTTP API phase).
 

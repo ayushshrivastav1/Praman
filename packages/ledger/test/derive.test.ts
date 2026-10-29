@@ -32,7 +32,7 @@ describe("deriveState", () => {
         ts: new Date("2026-09-04T10:00:01.000Z"),
         actor: "system",
         eventType: "api_call",
-        payload: { mandate_id: MANDATE, provider: "razorpay" },
+        payload: { mandate_id: MANDATE, provider: "zethetha" },
       }),
     );
     await prisma.$transaction((tx) =>
@@ -50,7 +50,7 @@ describe("deriveState", () => {
         },
       }),
     );
-    // LiveExecutor returns "created" immediately — capture happens later via
+    // An external executor may return "created" immediately — capture happens later via
     // reconciliation. This must still commit spend and register the
     // merchant, or every purchase at a merchant steps up forever (D-17).
     await prisma.$transaction((tx) =>

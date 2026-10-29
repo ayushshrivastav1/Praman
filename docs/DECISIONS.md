@@ -144,13 +144,13 @@ On execution failure the agent may retry once on an alternate method. If a retry
 
 `eval/report.md` includes `unresolved_exceptions` with case IDs and one-line reasons.
 
-**Rejected:** shipping a 100% claim. Razorpay's own brief says a cherry-picked result proves nothing and asks for an honest exception list. Four documented failures beat a perfect score a reviewer disproves in ten minutes.
+**Rejected:** shipping a 100% claim. Zethetha's own brief says a cherry-picked result proves nothing and asks for an honest exception list. Four documented failures beat a perfect score a reviewer disproves in ten minutes.
 
 ---
 
 ### D-17 · Auto-capture, with no second gate at capture time · Accepted
 
-Razorpay is configured to auto-capture, and uncaptured authorizations are set
+Zethetha is configured to auto-capture, and uncaptured authorizations are set
 to refund automatically rather than await manual dashboard capture.
 
 **Rejected:** manual capture as a second authorization checkpoint before money
@@ -207,16 +207,16 @@ status as of Block A:
 |---|---|---|
 | HTTP JSON bodies | `paiseFromJSON()` | implemented |
 | Postgres rows (`BigInt`) | `paiseFromDb()` | implemented |
-| Razorpay API responses | `paiseFromRazorpay()` | implemented |
+| Zethetha API responses | `paiseFromZethetha()` | implemented |
 | Catalog price lookup | `paiseFromDb()`, `packages/db/src/catalog.ts` | implemented |
 
 All four now guarded. The catalog boundary and the general Postgres-rows
 boundary turned out to be the same call site once `loadCatalogSnapshot` was
 built — `catalog_item.price_paise` is exactly the raw `BigInt` column
-`paiseFromDb` exists for, not a separate hydration path. `paiseFromRazorpay`
+`paiseFromDb` exists for, not a separate hydration path. `paiseFromZethetha`
 additionally checks `Number.isSafeInteger` in both directions — inbound on
-Razorpay's response amounts, and via a matching outbound guard
-(`toRazorpayAmount` in `executor.ts`) before a `Paise` is ever converted back
+Zethetha's response amounts, and via a matching outbound guard
+(`toZethethaAmount` in `executor.ts`) before a `Paise` is ever converted back
 to a `Number` for the API call, closing the boundary from both sides.
 `paiseFromJSON` validates with a strict pattern rather than trusting `BigInt`
 coercion, and CI greps for `as Paise` casts outside `money.ts` — currently
@@ -337,14 +337,14 @@ one transaction boundary, not a separate connection working around it.
 revisions of `HLD.md` and `INVARIANTS.md` invariant 5, which is unachievable
 as stated.
 
-**What forced this.** Empirical testing of Razorpay's test-mode API showed two
+**What forced this.** Empirical testing of Zethetha's test-mode API showed two
 things its documentation does not: `receipt` is *not* enforced as unique —
 two orders created back to back with an identical receipt returned two
 distinct order IDs, no error — and order lookup by receipt (`GET
 /orders?receipt=...`) lags creation by anywhere from a few seconds to over
 fifteen, measured directly. A direct fetch by order ID, by contrast, was
 consistent every time. The original single-transaction design wrapped the
-Razorpay call inside the Postgres transaction and relied on "the next
+Zethetha call inside the Postgres transaction and relied on "the next
 reconcile will find any orphan." Neither half of that holds: a retry landing
 inside the propagation window would find nothing and create a duplicate order.
 
@@ -356,7 +356,7 @@ between them. Any design claiming otherwise is claiming something impossible.
 without a durable, committed record that it was about to be made.
 
 - **T1** — under the per-mandate advisory lock: check our own idempotency
-  record first (immune to Razorpay's propagation lag — it's a row in the same
+  record first (immune to Zethetha's propagation lag — it's a row in the same
   transaction, not a search index), verify the mandate, derive state, evaluate,
   append `intent` and `decision`. On `ALLOW`, write a `pending` idempotency
   record carrying the receipt and amount, append an `api_call` marked
@@ -395,7 +395,7 @@ the day before submission. Fixed by giving tests their own
 `ledger_entry` and `idempotency_record` together, so no idempotency row can
 outlive the ledger entries it refers to.
 
-**Rejected: client-supplied idempotency at the gateway.** Razorpay does not
+**Rejected: client-supplied idempotency at the gateway.** Zethetha does not
 dedupe by receipt, so there is nothing to lean on there.
 
 **Rejected: cancelling the order as a compensating action.** A saga's
@@ -412,7 +412,7 @@ the problem rather than removing it.
    same mandate can therefore evaluate against a slightly understated budget.
    The window is one API call wide. Closing it means treating unresolved
    `api_call` entries as reserved spend — correct, and deferred.
-3. A crash between the Razorpay call returning and T2 committing leaves a
+3. A crash between the Zethetha call returning and T2 committing leaves a
    pending record; the reconciler resolves it, but the order exists
    unrecorded until it runs.
 4. The reconciler does not hold the per-mandate advisory lock T1/T2 use,
@@ -524,7 +524,7 @@ anything is committed.
 
 **A bug this surfaced, not just what it fixed:** `deriveState` originally
 counted only `status: "captured"` outcomes toward spend and
-`merchants_transacted`. `LiveExecutor.createOrder` returns `status:
+`merchants_transacted`. An external executor's `createOrder` may return `status:
 "created"` immediately — capture happens later, via reconciliation — so in
 live mode spend never accumulated and a merchant never entered the set.
 First purchase steps up, nothing resolves it, no capture, merchant never

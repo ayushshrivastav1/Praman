@@ -6,7 +6,7 @@ import { performance } from "node:perf_hooks";
 import "./db.js";
 import { propagateAttributes } from "@langfuse/tracing";
 import { runIntent } from "@praman/control-plane";
-import { SimulatedExecutor } from "@praman/razorpay-exec";
+import { SimulatedExecutor } from "@praman/zethetha-exec";
 import type { PurchaseIntent } from "@praman/policy";
 import { runAgent } from "@praman/buyer-agent";
 import type { ModelProvider } from "@praman/agent-core";

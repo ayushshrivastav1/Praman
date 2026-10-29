@@ -6,7 +6,7 @@ import type { SignedMandate } from "@praman/mandate";
 // @praman/db throws at import time if DATABASE_URL is unset, and static
 // imports are hoisted above a module's own top-level code — so loading dotenv
 // has to happen before a DYNAMIC import of @praman/db (via @praman/control-plane
-// and @praman/razorpay-exec), not a static one. Same fix as verify-ledger.ts.
+// and @praman/zethetha-exec), not a static one. Same fix as verify-ledger.ts.
 config({ path: fileURLToPath(new URL("../.env", import.meta.url)) });
 
 const approvalId = process.argv[2];
@@ -24,15 +24,12 @@ const mandatePath = fileURLToPath(new URL("../mandate.json", import.meta.url));
 const signed = JSON.parse(readFileSync(mandatePath, "utf8")) as SignedMandate;
 
 const { resolveApproval } = await import("@praman/control-plane");
-const { LiveExecutor, SimulatedExecutor } = await import("@praman/razorpay-exec");
+const { SimulatedExecutor } = await import("@praman/zethetha-exec");
 const { prisma } = await import("@praman/db");
 
-const live = process.env["PRAMAN_LIVE"] === "1";
-const executor = live
-  ? new LiveExecutor(process.env["RAZORPAY_KEY_ID"] ?? "", process.env["RAZORPAY_KEY_SECRET"] ?? "")
-  : new SimulatedExecutor();
+const executor = new SimulatedExecutor();
 
-console.log(`▸ ${verdict === "approve" ? "approving" : "rejecting"} ${approvalId}${live ? " (LIVE)" : ""}...\n`);
+console.log(`▸ ${verdict === "approve" ? "approving" : "rejecting"} ${approvalId} (simulated Zethetha)...\n`);
 
 const result = await resolveApproval(approvalId, verdict, signed, publicKeyPem, executor, new Date());
 

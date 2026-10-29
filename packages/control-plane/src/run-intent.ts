@@ -3,7 +3,7 @@ import { prisma, loadCatalogSnapshot } from "@praman/db";
 import { append, deriveState, maybeCheckpoint } from "@praman/ledger";
 import { evaluate, redact, type PurchaseIntent, type AgentVisibleDecision } from "@praman/policy";
 import { verifyMandate, type SignedMandate } from "@praman/mandate";
-import { idempotencyKey, receiptFor, type ExecOutcome, type Executor } from "@praman/razorpay-exec";
+import { idempotencyKey, receiptFor, type ExecOutcome, type Executor } from "@praman/zethetha-exec";
 import { canonical, paiseFromDb, paiseToJSON } from "@praman/shared";
 
 /** Shared with resolve-approval.ts — the same mandate must serialise through the same lock regardless of which path is mutating its state. */
@@ -44,7 +44,7 @@ function parseCachedOutcome(outcome: unknown, key: string): { orderId: string; s
 
 /**
  * Two phases with the external call between them, not one transaction around
- * it. A database transaction and a call to Razorpay cannot be made atomic —
+ * it. A database transaction and a call to Zethetha cannot be made atomic —
  * there is no protocol between them (the dual-write problem). What's
  * achievable instead: no external call is ever made without a durable,
  * committed record that it was about to be made. See D-22.
@@ -130,7 +130,7 @@ export async function runIntent(
       };
     }
 
-    // Short-circuit on our OWN record — immune to Razorpay's propagation lag,
+    // Short-circuit on our OWN record — immune to Zethetha's propagation lag,
     // because it is a row in the same transaction we are already inside.
     const prior = await tx.idempotencyRecord.findUnique({ where: { key } });
     if (prior?.status === "succeeded") {
@@ -253,7 +253,7 @@ export async function runIntent(
       eventType: "api_call",
       payload: {
         mandate_id: mandate.mandate_id,
-        provider: "razorpay",
+        provider: "zethetha",
         operation: "orders.create",
         receipt,
         amount_paise: paiseToJSON(decision.amount_paise),

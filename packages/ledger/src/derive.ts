@@ -41,7 +41,7 @@ export async function deriveState(tx: PrismaTx, mandateId: string): Promise<Ledg
         // A CREATED order moves spend, not only a captured one. An order
         // that exists is a payable obligation the mandate authorised —
         // Praman's authority to refuse ended when it was created (D-17).
-        // LiveExecutor returns "created" immediately and only becomes
+        // An external executor may return "created" immediately and only become
         // "captured" later via reconciliation; counting only "captured"
         // would let a mandate create unlimited orders while its budget
         // never moved. A decision is still not a payment — only outcome

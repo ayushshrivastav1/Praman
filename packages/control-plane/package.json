@@ -10,7 +10,7 @@
     "@praman/ledger": "workspace:*",
     "@praman/mandate": "workspace:*",
     "@praman/policy": "workspace:*",
-    "@praman/razorpay-exec": "workspace:*",
+    "@praman/zethetha-exec": "workspace:*",
     "@praman/shared": "workspace:*"
   }
 }

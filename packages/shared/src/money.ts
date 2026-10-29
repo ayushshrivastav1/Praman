@@ -57,12 +57,12 @@ export function paiseFromDb(value: bigint): Paise {
 }
 
 /**
- * Razorpay JSON number → Paise. Razorpay sends amounts as JSON numbers in
- * paise, so this is the one place a float can enter the money path.
+ * Zethetha-compatible JSON number → Paise. This is the one place a provider
+ * response number can enter the money path.
  */
-export function paiseFromRazorpay(value: unknown): Paise {
-  if (typeof value !== "number") throw new TypeError(`Razorpay amount is not a number: ${typeof value}`);
-  if (!Number.isSafeInteger(value)) throw new RangeError(`Razorpay amount is not a safe integer: ${value}`);
-  if (value < 0) throw new RangeError(`Razorpay amount is negative: ${value}`);
+export function paiseFromZethetha(value: unknown): Paise {
+  if (typeof value !== "number") throw new TypeError(`Zethetha amount is not a number: ${typeof value}`);
+  if (!Number.isSafeInteger(value)) throw new RangeError(`Zethetha amount is not a safe integer: ${value}`);
+  if (value < 0) throw new RangeError(`Zethetha amount is negative: ${value}`);
   return paise(BigInt(value));
 }

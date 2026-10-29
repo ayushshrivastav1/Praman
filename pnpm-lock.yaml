@@ -222,9 +222,9 @@ importers:
       '@praman/mandate':
         specifier: workspace:*
         version: link:packages/mandate
-      '@praman/razorpay-exec':
+      '@praman/zethetha-exec':
         specifier: workspace:*
-        version: link:packages/razorpay-exec
+        version: link:packages/zethetha-exec
       '@praman/shared':
         specifier: workspace:*
         version: link:packages/shared
@@ -289,9 +289,9 @@ importers:
       '@praman/policy':
         specifier: workspace:*
         version: link:../../packages/policy
-      '@praman/razorpay-exec':
+      '@praman/zethetha-exec':
         specifier: workspace:*
-        version: link:../../packages/razorpay-exec
+        version: link:../../packages/zethetha-exec
       '@praman/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -331,9 +331,9 @@ importers:
       '@praman/policy':
         specifier: workspace:*
         version: link:../../packages/policy
-      '@praman/razorpay-exec':
+      '@praman/zethetha-exec':
         specifier: workspace:*
-        version: link:../../packages/razorpay-exec
+        version: link:../../packages/zethetha-exec
       '@praman/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -406,9 +406,9 @@ importers:
       '@praman/policy':
         specifier: workspace:*
         version: link:../policy
-      '@praman/razorpay-exec':
+      '@praman/zethetha-exec':
         specifier: workspace:*
-        version: link:../razorpay-exec
+        version: link:../zethetha-exec
       '@praman/shared':
         specifier: workspace:*
         version: link:../shared
@@ -461,7 +461,7 @@ importers:
         specifier: workspace:*
         version: link:../shared
 
-  packages/razorpay-exec:
+  packages/zethetha-exec:
     dependencies:
       '@praman/policy':
         specifier: workspace:*

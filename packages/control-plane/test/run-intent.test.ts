@@ -3,7 +3,7 @@ import { prisma } from "@praman/db";
 import { append } from "@praman/ledger";
 import type { PurchaseIntent } from "@praman/policy";
 import { generateKeypair, signMandate, type MandateDocument } from "@praman/mandate";
-import { SimulatedExecutor } from "@praman/razorpay-exec";
+import { SimulatedExecutor } from "@praman/zethetha-exec";
 import { runIntent } from "../src/run-intent.js";
 
 const MERCHANT = "TEST_REVOKE_MERCH";

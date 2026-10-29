@@ -24,7 +24,7 @@ jobs:
 
     # Points at this job's own ephemeral Postgres service, not a secret —
     # nothing in `pnpm test` / `verify-ledger` / `eval --layer1` reads
-    # Razorpay, Anthropic, Gemini, or mandate-signing keys (Layer 1 signs
+    # Zethetha, Anthropic, Gemini, or mandate-signing keys (Layer 1 signs
     # fresh throwaway keypairs per case, and every executor here is
     # simulated). Layer 2 needs GEMINI_API_KEY and stays manual — it burns
     # real rate-limit budget and isn't run on every push.

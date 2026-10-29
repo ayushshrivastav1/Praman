@@ -3,7 +3,7 @@ import { prisma } from "@praman/db";
 import { append } from "@praman/ledger";
 import type { PurchaseIntent } from "@praman/policy";
 import { generateKeypair, signMandate, type MandateDocument } from "@praman/mandate";
-import { SimulatedExecutor, type ExecOutcome, type Executor } from "@praman/razorpay-exec";
+import { SimulatedExecutor, type ExecOutcome, type Executor } from "@praman/zethetha-exec";
 import type { Paise } from "@praman/shared";
 import { runIntent, RECONCILE_MIN_AGE_MS } from "../src/run-intent.js";
 import { reconcilePending } from "../src/reconcile.js";
